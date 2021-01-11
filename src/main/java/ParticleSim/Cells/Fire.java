@@ -9,8 +9,11 @@ import ParticleSim.Pos;
 import ParticleSim.SandLab;
 
 public class Fire extends Cell {
-    // Fire despawns when not near a flammable cell
+    // Fire despawns when not near a flammable cell for too long
     private int awayFromFlammable = 0;
+
+    // How many ticks away from flammable does fire have
+    private static final int lifeTime = 40;
 
     public Fire() {
         super(new Color(130, 30, 2), new Color(176, 58, 2), new Color(230, 117, 23), new Color(249, 158, 50), new Color(247, 232, 99));
@@ -54,7 +57,7 @@ public class Fire extends Cell {
                 break;
         }
 
-        if (++awayFromFlammable > 20) {
+        if (++awayFromFlammable > lifeTime) {
             this.removeCell();
             return;
         }

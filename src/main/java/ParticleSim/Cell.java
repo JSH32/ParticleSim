@@ -108,21 +108,25 @@ public abstract class Cell {
                     SandLab.grid[row][col] = null;
                     SandLab.grid[++row][--col] = this;
                 }
+                break;
             case BOTTOMRIGHT:
                 if (canMove(row+1, col+1)) {
                     SandLab.grid[row][col] = null;
                     SandLab.grid[++row][++col] = this;
                 }
+                break;
             case TOPLEFT:
                 if (canMove(row-1, col-1)) {
                     SandLab.grid[row][col] = null;
                     SandLab.grid[--row][--col] = this;
                 }
+                break;
             case TOPRIGHT:
                 if (canMove(row-1, col+1)) {
                     SandLab.grid[row][col] = null;
                     SandLab.grid[--row][++col] = this;
                 }
+                break;
         }
     }
 
@@ -181,11 +185,8 @@ public abstract class Cell {
     }
 
     public static boolean canMove(int row, int col) {
-        if (row >= 0 && row < SandLab.grid.length) {
-            if (col >= 0 && col < SandLab.grid[row].length) {
-                if (SandLab.grid[row][col] != null) return false;
-                return true;
-            }
+        if (SandLab.inBounds(row, col)) {
+            if (SandLab.grid[row][col] == null) return true;
         }
         return false;
     }

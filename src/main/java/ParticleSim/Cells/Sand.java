@@ -23,10 +23,35 @@ public class Sand extends Cell {
 
         if (this.canMove(Direction.BOTTOM)) {
             this.move(Direction.BOTTOM);
-        } else if (this.canMove(Direction.BOTTOMLEFT)) {
-            this.move(Direction.BOTTOMLEFT);
-        } else if (this.canMove(Direction.BOTTOMRIGHT)) {
-            this.move(Direction.BOTTOMRIGHT);
+            return;
+        }
+
+        boolean attemptedLeft = false;
+        boolean attemptedRight = false;
+
+        loop: {
+            switch (random.nextInt(2)) {
+                case 0: {
+                    if (this.canMove(Direction.BOTTOMLEFT)) {
+                        this.move(Direction.BOTTOMLEFT);
+                        return;
+                    }
+                    attemptedLeft = true;
+                    if (attemptedRight) {
+                        break;
+                    }
+                }
+                case 1: {
+                    if (this.canMove(Direction.BOTTOMRIGHT)) {
+                        this.move(Direction.BOTTOMRIGHT);
+                        return;
+                    }
+                    attemptedRight = true;
+                    if (attemptedLeft) {
+                        break loop;
+                    }
+                }
+            }
         }
     }
 }

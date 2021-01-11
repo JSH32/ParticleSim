@@ -69,7 +69,7 @@ public class SandLab {
 
     public static boolean inBounds(int row, int col) {
         if (row >= 0 && row < SandLab.grid.length) {
-            if (col >= 0 && col < SandLab.grid[row].length) {
+            if (col >= 0 && col <= SandLab.grid[row].length-1) {
                 return true;
             }
         }
