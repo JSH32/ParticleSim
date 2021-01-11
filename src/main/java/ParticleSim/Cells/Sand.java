@@ -15,7 +15,9 @@ public class Sand extends Cell {
         Cell below = this.getRelative(Direction.BOTTOM);
         if (below != null && below instanceof Water) {
             SandLab.grid[++row][col] = this;
-            SandLab.grid[--below.row][col] = below;
+            if (below.row != 0) {
+                SandLab.grid[--below.row][below.col] = below;
+            }
             return;
         }
 

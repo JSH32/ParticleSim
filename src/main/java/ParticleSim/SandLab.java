@@ -6,73 +6,43 @@ import ParticleSim.Cells.*;
 
 public class SandLab {
     public static void main(String[] args) {
-        SandLab lab = new SandLab(100, 200);
-        lab.run();
+        new SandLab(200, 200).run();
     }
 
     // do not add any more fields
     public static Cell[][] grid;
     public static SandDisplay display;
-    private final int numRows, numCols;
+    public static int numRows, numCols;
 
     // Used to determine which cells have been updated
     private static boolean flip = false;
 
     // Color of the sky
-    public static Color skyColor = new Color(109, 183, 222);
+    public static Color skyColor = new Color(160, 203, 235);
 
-    public static final int RESET = 0;
-    public static final int EMPTY = 1;
-    public static final int SAND = 2;
-    public static final int METAL = 3;
-    public static final int WATER = 4;
-    public static final int WOOD = 5;
-    public static final int FIRE = 6;
-
+    @SuppressWarnings("unchecked")
     public SandLab(int numRows, int numCols) {
-        this.numRows = numRows;
-        this.numCols = numCols;
+        SandLab.numRows = numRows;
+        SandLab.numCols = numCols;
 
-        grid = new Cell[this.numRows][this.numCols];
+        grid = new Cell[SandLab.numRows][SandLab.numCols];
+        
+        // Black magic
+        Class<?>[] cellTypes = {
+            null,
+            Sand.class,
+            Metal.class,
+            Water.class,
+            Wood.class,
+            Fire.class,
+        };
 
-        String[] names;
-        names = new String[7];
-        names[RESET] = "Reset";
-        names[EMPTY] = "Empty";
-        names[SAND] = "Sand";
-        names[METAL] = "Metal";
-        names[WATER] = "Water";
-        names[WOOD] = "Wood";
-        names[FIRE] = "Fire";
-
-        display = new SandDisplay("Falling Sand", numRows, numCols, names);
+        display = new SandDisplay("Falling Sand", numRows, numCols, (Class<? extends Cell>[])cellTypes);
     }
 
     // called when the user clicks on a location using the given tool
-    private void locationClicked(int row, int col, int tool) {
-        switch (tool) {
-            case RESET:
-                grid = new Cell[this.numRows][this.numCols];
-                break;
-            case EMPTY:
-                this.drawCircle(col, row, display.sizeSliderValue(), null);
-                break;
-            case SAND:
-                this.drawCircle(col, row, display.sizeSliderValue(), Sand.class);
-                break;
-            case METAL:
-                this.drawCircle(col, row, display.sizeSliderValue(), Metal.class);
-                break;
-            case WATER:
-                this.drawCircle(col, row, display.sizeSliderValue(), Water.class);
-                break;
-            case WOOD:
-                this.drawCircle(col, row, display.sizeSliderValue(), Wood.class);
-                break;
-            case FIRE:
-                this.drawCircle(col, row, display.sizeSliderValue(), Fire.class);
-                break;
-        }
+    private void locationClicked(int row, int col, Class<? extends Cell> tool) {
+        this.drawCircle(col, row, display.sizeSliderValue(), tool);
     }
 
     private void putPixel(int x, int y, Cell cell) {
@@ -161,7 +131,7 @@ public class SandLab {
             display.pause(1);  //wait for redrawing and for mouse
             int[] mouseLoc = display.getMouseLocation();
             if (mouseLoc != null)  //test if mouse clicked
-                locationClicked(mouseLoc[0], mouseLoc[1], display.getTool());
+                locationClicked(mouseLoc[0], mouseLoc[1], display.getSelected());
         }
     }
 }

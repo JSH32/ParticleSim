@@ -10,26 +10,29 @@ import javax.swing.event.*;
 public class SandDisplay extends JComponent implements MouseListener,
   MouseMotionListener, ActionListener, ChangeListener
 {
-	
+	private static final long serialVersionUID = 1L;
   private BufferedImage image;
   private int cellSize;
   private JFrame frame;
-  private int tool;
   private int numRows;
   private int numCols;
   private int[] mouseLoc;
-  private JButton[] buttons;
-  private JSlider sizeSlider;
-  //private int speed;
+
+  private HashMap<String, JButton> cellButtons = new HashMap<String, JButton>();
+  private JButton selectedCellButton;
   
-  public SandDisplay(String title, int numRows, int numCols, String[] buttonNames)
+  private JSlider sizeSlider;
+  
+  public SandDisplay(String title, int numRows, int numCols, Class<? extends Cell>[] cellTypes)
   {
     this.numRows = numRows;
     this.numCols = numCols;
-    tool = 1;
     mouseLoc = null;
-    //speed = computeSpeed(50);
     
+    try { 
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {}
+
     //determine cell size
     cellSize = Math.max(1, 600 / Math.max(numRows, numCols));
     image = new BufferedImage(numCols * cellSize, numRows * cellSize, BufferedImage.TYPE_INT_RGB);
@@ -47,29 +50,51 @@ public class SandDisplay extends JComponent implements MouseListener,
     addMouseMotionListener(this);
     topPanel.add(this);
     
+    
     JPanel buttonPanel = new JPanel();
-    buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
-    topPanel.add(buttonPanel);
-    
-    buttons = new JButton[buttonNames.length];
-    
-    for (int i = 0; i < buttons.length; i++)
-    {
-      buttons[i] = new JButton(buttonNames[i]);
-      buttons[i].setActionCommand("" + i);
-      buttons[i].addActionListener(this);
-      buttonPanel.add(buttons[i]);
+
+    JButton resetButton = new JButton("Reset");
+    buttonPanel.add(resetButton);
+
+    resetButton.addActionListener(new AbstractAction() {
+      private static final long serialVersionUID = 1L;
+      
+		  @Override
+      public void actionPerformed(ActionEvent e) {
+        SandLab.grid = new Cell[SandLab.numRows][SandLab.numCols];
+      }
+    });
+
+    frame.getContentPane().add(buttonPanel);
+
+    JPanel cellButtonPanel = new JPanel();
+
+    for (int i = 0; i < cellTypes.length; i++) {
+      JButton btn;
+      if (cellTypes[i] != null) {
+        btn = new JButton(cellTypes[i].getSimpleName());
+        cellButtons.put(cellTypes[i].getName(), btn);
+        btn.setActionCommand(cellTypes[i].getName());
+      } else {
+        btn = new JButton("Empty");
+        cellButtons.put("Empty", btn);
+      }
+      btn.addActionListener(this);
+      cellButtonPanel.add(btn);
     }
+
+    buttonPanel.add(cellButtonPanel);
     
-    buttons[tool].setSelected(true);
+    JButton selected = (JButton)cellButtons.values().toArray()[0];
+    selected.setSelected(true);
    
     sizeSlider = new JSlider(JSlider.HORIZONTAL, 1, 10, 1);
     sizeSlider.addChangeListener(this);
     sizeSlider.setMajorTickSpacing(1);
     sizeSlider.setPaintTicks(true);
     Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-    labelTable.put(new Integer(0), new JLabel("1"));
-    labelTable.put(new Integer(100), new JLabel("10"));
+    labelTable.put(Integer.valueOf(0), new JLabel("1"));
+    labelTable.put(Integer.valueOf(100), new JLabel("10"));
     sizeSlider.setLabelTable(labelTable);
     sizeSlider.setPaintLabels(true);
 
@@ -105,9 +130,14 @@ public class SandDisplay extends JComponent implements MouseListener,
     return mouseLoc;
   }
   
-  public int getTool()
+  @SuppressWarnings("unchecked")
+  public Class<? extends Cell> getSelected()
   {
-    return tool;
+    try {
+      return (Class<? extends Cell>) Class.forName(selectedCellButton.getActionCommand());
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   public void clear(Color color) {
@@ -168,8 +198,8 @@ public class SandDisplay extends JComponent implements MouseListener,
   
   public void actionPerformed(ActionEvent e)
   {
-    tool = Integer.parseInt(e.getActionCommand());
-    for (JButton button : buttons)
+    selectedCellButton = cellButtons.get(e.getActionCommand());
+    for (JButton button : (JButton[])cellButtons.values().toArray(new JButton[cellButtons.size()]))
       button.setSelected(false);
     ((JButton)e.getSource()).setSelected(true);
   }
@@ -193,12 +223,12 @@ public class SandDisplay extends JComponent implements MouseListener,
   //   return (int)Math.pow(10, 0.03 * sliderValue + 3);
   // }
 
-  private void enterFullScreen() {
-    GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice device = graphicsEnvironment.getDefaultScreenDevice();
-    if (device.isFullScreenSupported()) {
-        device.setFullScreenWindow(frame);
-        frame.validate();
-    }
-  }
+  // private void enterFullScreen() {
+  //   GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+  //   GraphicsDevice device = graphicsEnvironment.getDefaultScreenDevice();
+  //   if (device.isFullScreenSupported()) {
+  //       device.setFullScreenWindow(frame);
+  //       frame.validate();
+  //   }
+  // }
 }
